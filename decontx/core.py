@@ -351,7 +351,7 @@ def _store_metadata(
 
     metadata = {
         'parameters': {
-            'delta': delta,
+            'delta': list(delta),
             'estimate_delta': estimate_delta,
             'max_iter': max_iter,
             'convergence': convergence,
