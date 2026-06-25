@@ -42,3 +42,7 @@ vendor/
 coverage/
 .cache/
 tmp/
+
+# - GSE artifacts -
+.agents
+skills-lock.json
