@@ -1,6 +1,5 @@
 """Tests for decontx sparse EM rewrite."""
 
-import pytest
 import numpy as np
 from scipy.sparse import csr_matrix, issparse
 from anndata import AnnData

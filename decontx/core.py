@@ -140,8 +140,12 @@ def decontx(
     # Store results
     _store_results(adata, results, z_labels, cluster_key, batch_key)
 
+    # Use fitted delta (may differ from input when estimate_delta=True)
+    first_result = results.get("all") or next(iter(results.values()))
+    fitted_delta = first_result.get("delta", delta)
+
     # Store metadata
-    _store_metadata(adata, delta, estimate_delta, max_iter, convergence, seed, start_time)
+    _store_metadata(adata, fitted_delta, estimate_delta, max_iter, convergence, seed, start_time)
 
     if verbose:
         contamination = adata.obs['decontX_contamination']
@@ -306,21 +310,14 @@ def _store_results(
         for batch_name, result in results.items():
             if 'batch_indices' in result:
                 batch_indices = result['batch_indices']
-                batch_matrices[tuple(batch_indices.tolist())] = (
+                batch_matrices[batch_name] = (
                     batch_indices, result['decontaminated_counts']
                 )
                 contamination[batch_indices] = result['contamination']
 
-        # Reconstruct full sparse matrix in original cell order
-        row_parts = [None] * n_cells
-        for _, (batch_indices, mat) in batch_matrices.items():
-            for local_i, global_i in enumerate(batch_indices):
-                row_parts[global_i] = local_i, mat
-
         # Build ordered list of per-batch matrices with index tracking
         ordered = sorted(batch_matrices.values(), key=lambda x: x[0][0])
         if ordered:
-            from scipy.sparse import csr_matrix as _csr
             stacked = vstack([m for _, m in ordered], format='csr')
             # Reorder rows to match original cell indices
             all_indices = np.concatenate([idx for idx, _ in ordered])
